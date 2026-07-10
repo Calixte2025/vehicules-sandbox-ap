@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Faker\Factory as FakerFactory;
 
 class VehiculeController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $faker = FakerFactory::create();
+        $faker->seed(1234); // données stables et reproductibles
 
         $genres = ["VOITURE PART.", "CAMION", "MOTO", "BUS", "REMORQUE"];
         $energies = ["ESSENCE", "DIESEL", "ELECTRIQUE", "HYBRIDE"];
@@ -60,6 +62,15 @@ class VehiculeController extends Controller
                 "sTelephone_proprietaire" => "",
                 "sUtilisation" => $faker->randomElement($utilisations),
             ];
+        }
+
+        // Filtrage par immatriculation si paramètre présent
+        $immatriculation = $request->query('immatriculation');
+        if ($immatriculation) {
+            $vehicules = collect($vehicules)
+                ->where('sIdimmatriculation', strtoupper($immatriculation))
+                ->values()
+                ->all();
         }
 
         return response()->json($vehicules);
