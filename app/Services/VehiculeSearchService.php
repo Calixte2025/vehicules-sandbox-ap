@@ -2,25 +2,18 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use App\Models\Vehicule;
 
 class VehiculeSearchService
 {
     public function findByImmatriculation(string $immatriculation)
     {
-        // Choix de l’URL selon l’environnement
-        $baseUrl = app()->environment('production')
-            ? env('API_URL_PROD')
-            : env('API_URL_DEV');
+        $vehicule = Vehicule::where('sIdimmatriculation', strtoupper($immatriculation))->first();
 
-        // Requête HTTP avec baseUrl
-        $response = Http::baseUrl($baseUrl)
-            ->get("/vehicules", [
-                'immatriculation' => $immatriculation
-            ]);
+        if ($vehicule) {
+            return $vehicule;
+        }
 
-        return $response->successful()
-            ? $response->json()
-            : ['error' => 'Véhicule non trouvé ou API inaccessible'];
+        return ['error' => 'Véhicule non trouvé'];
     }
 }
