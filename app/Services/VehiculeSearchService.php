@@ -9,20 +9,18 @@ class VehiculeSearchService
     public function findByImmatriculation(string $immatriculation)
     {
         // Choix de l’URL selon l’environnement
-        $apiUrl = env('APP_ENV') === 'production'
+        $baseUrl = app()->environment('production')
             ? env('API_URL_PROD')
             : env('API_URL_DEV');
 
-        // Appel API avec l’immatriculation en query param
-        $response = Http::get($apiUrl . '/vehicules', [
-            'immatriculation' => $immatriculation
-        ]);
+        // Requête HTTP avec baseUrl
+        $response = Http::baseUrl($baseUrl)
+            ->get("/vehicules", [
+                'immatriculation' => $immatriculation
+            ]);
 
-        // Retourne le résultat JSON ou un message d’erreur
-        if ($response->successful()) {
-            return $response->json();
-        }
-
-        return ['error' => 'Véhicule non trouvé ou API inaccessible'];
+        return $response->successful()
+            ? $response->json()
+            : ['error' => 'Véhicule non trouvé ou API inaccessible'];
     }
 }
